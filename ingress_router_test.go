@@ -162,6 +162,16 @@ func TestIngressRouter(t *testing.T) {
 			require.Equal(t, "", ingress)
 			require.Equal(t, "", svc)
 		})
+
+		t.Run("It matches on the first ingress", func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, "https://foo.com:443/path1", nil)
+			require.NoError(t, err)
+			namespace, ingress, svc, ok := ir.MatchRequest(req)
+			require.True(t, ok)
+			require.Equal(t, "ns1", namespace)
+			require.Equal(t, "name1", ingress)
+			require.Equal(t, "svc11.ns1.svc:80", svc)
+		})
 	})
 
 	t.Run("It can delete an ingress sucessfully", func(t *testing.T) {

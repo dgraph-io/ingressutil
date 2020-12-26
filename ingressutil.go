@@ -4,6 +4,7 @@ package ingressutil
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"k8s.io/client-go/kubernetes"
 )
@@ -16,6 +17,18 @@ type IngressRouter interface {
 
 	// StartAutoUpdate starts listening to kube for updates. It returns a function which can be called to block until all ingresses have been read
 	StartAutoUpdate(ctx context.Context, kubeClient *kubernetes.Clientset) (waitTillReady func())
+}
+
+func GetHostname(r *http.Request) string {
+	hostname := r.Header.Get("Host")
+	if hostname == "" {
+		hostname = r.Host
+	}
+	if idx := strings.IndexByte(hostname, ':'); idx >= 0 {
+		hostname = hostname[:idx]
+	}
+
+	return hostname
 }
 
 var _ IngressRouter = (*ingressRouter)(nil)

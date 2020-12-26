@@ -55,10 +55,7 @@ func (ir *ingressRouter) StartAutoUpdate(ctx context.Context, kubeClient *kubern
 }
 
 func (ir *ingressRouter) MatchRequest(r *http.Request) (string, string, string, bool) {
-	hostname := r.Header.Get("Host")
-	if hostname == "" {
-		hostname = r.Host
-	}
+	hostname := GetHostname(r)
 	routeMap := ir.getRouteMap()
 	if routeMap == nil {
 		glog.Errorln("Received a request to MatchRequest before routemap was filled")
