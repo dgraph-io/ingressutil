@@ -54,7 +54,23 @@ func (ir *ingressRouter) StartAutoUpdate(ctx context.Context, kubeClient *kubern
 	}
 }
 
+var setUpstreamKey struct{}
+
+type upstream struct {
+	namespace string
+	name      string
+	address   string
+}
+
+// SetUpstream forces the upstream value to be set, so that you do not need to query the map again
+func SetUpstream(r *http.Request, namespace, name, addr string) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), setUpstreamKey, &upstream{namespace, name, addr}))
+}
+
 func (ir *ingressRouter) MatchRequest(r *http.Request) (string, string, string, bool) {
+	if match, ok := r.Context().Value(setUpstreamKey).(*upstream); ok {
+		return match.namespace, match.name, match.address, true
+	}
 	hostname := GetHostname(r)
 	routeMap := ir.getRouteMap()
 	if routeMap == nil {

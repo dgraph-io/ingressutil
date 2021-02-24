@@ -172,6 +172,17 @@ func TestIngressRouter(t *testing.T) {
 			require.Equal(t, "name1", ingress)
 			require.Equal(t, "svc11.ns1.svc:80", svc)
 		})
+
+		t.Run("Lets you override the request", func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, "https://foo.com/path1", nil)
+			require.NoError(t, err)
+			req = SetUpstream(req, "ns2", "name2", "svc22.ns2.svc:80")
+			namespace, ingress, svc, ok := ir.MatchRequest(req)
+			require.True(t, ok)
+			require.Equal(t, "ns2", namespace)
+			require.Equal(t, "name2", ingress)
+			require.Equal(t, "svc22.ns2.svc:80", svc)
+		})
 	})
 
 	t.Run("It can delete an ingress sucessfully", func(t *testing.T) {
